@@ -10,6 +10,7 @@ app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(16))
 # Initialize NDB client
 ndb_client = ndb.Client()
 
+# Main Class
 class User(ndb.Model):
     """User model for storing user credentials"""
     username = ndb.StringProperty(required=True)
