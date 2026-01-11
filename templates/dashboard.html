@@ -1,798 +1,208 @@
-<!-- templates/dashboard.html -->
 {% extends "base.html" %}
 
-{% block title %}Dashboard - Auth App{% endblock %}
+{% block title %}AMG Configurator - Control Center{% endblock %}
 
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMG Car Configurator</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-app-compat.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-firestore-compat.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
-            color: #ffffff;
-            min-height: 100vh;
-        }
-
-        .header {
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid #333;
-            padding: 1.5rem;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            color: #dc2626;
-        }
-
-        .logo-text {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .price-display {
-            text-align: right;
-        }
-
-        .price-label {
-            font-size: 0.875rem;
-            color: #9ca3af;
-        }
-
-        .price-amount {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #dc2626;
-        }
-
-        .progress-bar {
-            background: rgba(31, 41, 55, 0.5);
-            border-bottom: 1px solid #333;
-            padding: 1.5rem;
-        }
-
-        .progress-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .progress-step {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .step-circle {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 2px solid #4b5563;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.875rem;
-        }
-
-        .step-circle.active {
-            border-color: #dc2626;
-            background: rgba(220, 38, 38, 0.2);
-            color: #dc2626;
-        }
-
-        .step-circle.completed {
-            border-color: #10b981;
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
-        }
-
-        .step-arrow {
-            color: #4b5563;
-            margin: 0 0.5rem;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .section-title {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 2rem;
-        }
-
-        .grid {
-            display: grid;
-            gap: 1.5rem;
-        }
-
-        .grid-2 {
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-        }
-
-        .grid-3 {
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        }
-
-        .grid-4 {
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        }
-
-        .card {
-            background: rgba(31, 41, 55, 0.5);
-            border: 2px solid #374151;
-            border-radius: 1rem;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            border-color: #dc2626;
-            transform: scale(1.02);
-        }
-
-        .card.selected {
-            border-color: #dc2626;
-            background: rgba(220, 38, 38, 0.1);
-        }
-
-        .card-image {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-        }
-
-        .card-content {
-            padding: 1.5rem;
-        }
-
-        .card-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-
-        .card-description {
-            color: #9ca3af;
-            font-size: 0.875rem;
-            margin-bottom: 1rem;
-        }
-
-        .card-price {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: #dc2626;
-        }
-
-        .option-card {
-            background: rgba(31, 41, 55, 0.5);
-            border: 2px solid #374151;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .option-card:hover {
-            border-color: #4b5563;
-        }
-
-        .option-card.selected {
-            border-color: #dc2626;
-            background: rgba(220, 38, 38, 0.1);
-        }
-
-        .color-swatch {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 2px solid #4b5563;
-            margin-right: 0.75rem;
-        }
-
-        .btn {
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 0.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-        }
-
-        .btn-primary {
-            background: #dc2626;
-            color: white;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            background: #b91c1c;
-        }
-
-        .btn-primary:disabled {
-            background: #374151;
-            color: #6b7280;
-            cursor: not-allowed;
-        }
-
-        .nav-buttons {
-            margin-top: 3rem;
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 50vh;
-            font-size: 1.5rem;
-        }
-
-        .checkout-summary {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .summary-image {
-            width: 100%;
-            border-radius: 0.5rem;
-        }
-
-        .summary-details {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #374151;
-        }
-
-        .summary-total {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #dc2626;
-            padding: 1rem 0;
-        }
-
-        .check-icon {
-            color: #10b981;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .grid-2, .grid-3, .grid-4 {
-                grid-template-columns: 1fr;
-            }
-            
-            .summary-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .progress-content {
-                overflow-x: auto;
-            }
-
-            .step-label {
-                display: none;
-            }
-        }
-    </style>
-</head>
-<body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <svg class="logo-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                </svg>
-                <span class="logo-text">AMG Configurator</span>
-            </div>
-            <div class="price-display">
-                <div class="price-label">Total Price</div>
-                <div class="price-amount" id="totalPrice">$0</div>
-            </div>
+<div class="container-fluid fadeInUp" style="padding: 2rem 5%;">
+    <div class="d-flex justify-content-between align-items-end mb-4" style="border-bottom: 2px solid #333; padding-bottom: 1.5rem;">
+        <div>
+            <h6 class="text-uppercase" style="color: #d1001a; letter-spacing: 2px; margin-bottom: 0.5rem;">Member Profile</h6>
+            <h2 style="color: #fff; margin: 0; font-weight: 700;">Pilot: <span style="color: #f8f9fa;">{{ session.username }}</span></h2>
         </div>
-    </header>
-
-    <!-- Progress Bar -->
-    <div class="progress-bar">
-        <div class="progress-content" id="progressBar"></div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="container">
-        <div id="loadingScreen" class="loading">
-            <div>Loading...</div>
-        </div>
-
-        <div id="modelStep" class="hidden">
-            <h2 class="section-title">Choose Your AMG Model</h2>
-            <div id="modelGrid" class="grid grid-2"></div>
-        </div>
-
-        <div id="trimStep" class="hidden">
-            <h2 class="section-title">Select Trim Package</h2>
-            <div id="trimGrid" class="grid grid-3"></div>
-        </div>
-
-        <div id="colorStep" class="hidden">
-            <h2 class="section-title">Choose Exterior Color</h2>
-            <div id="colorGrid" class="grid grid-4"></div>
-        </div>
-
-        <div id="wheelsStep" class="hidden">
-            <h2 class="section-title">Select Wheels</h2>
-            <div id="wheelsGrid" class="grid grid-3"></div>
-        </div>
-
-        <div id="interiorStep" class="hidden">
-            <h2 class="section-title">Choose Interior</h2>
-            <div id="interiorGrid" class="grid grid-3"></div>
-        </div>
-
-        <div id="checkoutStep" class="hidden">
-            <h2 class="section-title">Order Summary</h2>
-            <div class="checkout-summary">
-                <div class="card">
-                    <div class="summary-grid" style="padding: 2rem;">
-                        <div>
-                            <img id="summaryImage" class="summary-image" src="" alt="Your AMG">
-                        </div>
-                        <div class="summary-details">
-                            <h3 id="summaryModel" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;"></h3>
-                            <div id="summaryDetails"></div>
-                            <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="completePurchase()">
-                                Complete Purchase
-                            </button>
-                            <p style="text-align: center; font-size: 0.875rem; color: #9ca3af;">Tax, title, and registration fees not included</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="navButtons" class="nav-buttons hidden">
-            <button class="btn btn-primary" id="continueBtn" onclick="nextStep()" disabled>
-                Continue →
-            </button>
+        <div class="text-right">
+            <h6 class="text-uppercase" style="color: #888; letter-spacing: 1px; margin-bottom: 0.5rem;">Total Investment</h6>
+            <h1 id="totalPrice" style="color: #d1001a; margin: 0; font-weight: 900; font-size: 3rem;">$0</h1>
         </div>
     </div>
 
-    <script>
-        // Firebase Configuration - Replace with your actual config
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
+    <div class="progress-container mb-5">
+        <div class="d-flex justify-content-between" id="stepIndicator"></div>
+    </div>
 
-        // Initialize Firebase
-        let db;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
-        } catch (error) {
-            console.log('Firebase not configured, using mock data');
-        }
+    <div class="row g-5">
+        <div class="col-lg-7">
+            <div class="card-glassmorphism shadow-lg" style="position: sticky; top: 100px; padding: 20px; border-radius: 15px; background: rgba(255,255,255,0.03);">
+                <div id="preview-container" style="min-height: 400px; display: flex; align-items: center; justify-content: center;">
+                    <img id="main-car-image" src="" class="img-fluid rounded" style="transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));" alt="AMG Preview">
+                </div>
+                <div class="text-center mt-3">
+                    <span class="badge" style="background: #d1001a; padding: 8px 20px; border-radius: 50px; font-weight: 600; letter-spacing: 1px;">AMG REAL-TIME VISUALIZER</span>
+                </div>
+            </div>
+        </div>
 
-        // State
-        let currentStep = 'model';
-        let models = [];
-        let selectedModel = null;
-        let configuration = {
-            model: null,
-            trim: null,
-            color: null,
-            wheels: null,
-            interior: null
-        };
+        <div class="col-lg-5">
+            <div id="config-panel" style="min-height: 500px;">
+                <div id="step-content"></div>
+            </div>
 
-        // Mock Data
-        const mockData = [
-            {
-                id: 'gt63s',
-                name: 'AMG GT 63 S',
-                basePrice: 159950,
-                image: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=800&auto=format&fit=crop',
-                description: '639 hp, 0-60 mph in 3.1s',
-                trims: [
-                    { id: 'standard', name: 'Standard', price: 0, description: 'Base configuration' },
-                    { id: 'performance', name: 'Performance Package', price: 8500, description: 'Enhanced suspension and brakes' },
-                    { id: 'premium', name: 'Premium Plus', price: 15000, description: 'Luxury features and tech' }
-                ],
-                colors: [
-                    { id: 'obsidian', name: 'Obsidian Black', price: 0, hex: '#1a1a1a', image: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=800' },
-                    { id: 'polar', name: 'Polar White', price: 1200, hex: '#f5f5f5', image: 'https://images.unsplash.com/photo-1619405399517-d7fce0f13302?w=800' },
-                    { id: 'designo', name: 'Designo Selenite Grey', price: 3500, hex: '#5a5a5a', image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800' },
-                    { id: 'jupiter', name: 'Jupiter Red', price: 3500, hex: '#8b0000', image: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=800' }
-                ],
-                wheels: [
-                    { id: '20inch', name: '20" AMG Multi-Spoke', price: 0, image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=400' },
-                    { id: '21inch', name: '21" AMG Cross-Spoke Forged', price: 2500, image: 'https://images.unsplash.com/photo-1625231334168-35067f8853ed?w=400' },
-                    { id: '22inch', name: '22" AMG Carbon Fiber', price: 5500, image: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400' }
-                ],
-                interiors: [
-                    { id: 'black', name: 'Black Nappa Leather', price: 0, image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400' },
-                    { id: 'red', name: 'Red Pepper/Black', price: 3200, image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400' },
-                    { id: 'brown', name: 'Saddle Brown/Black', price: 3200, image: 'https://images.unsplash.com/photo-1542362567-b07e54358753?w=400' }
-                ]
-            },
-            {
-                id: 'c63s',
-                name: 'AMG C 63 S',
-                basePrice: 78950,
-                image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800&auto=format&fit=crop',
-                description: '503 hp, 0-60 mph in 3.8s',
-                trims: [
-                    { id: 'standard', name: 'Standard', price: 0, description: 'Base configuration' },
-                    { id: 'performance', name: 'Performance Package', price: 6500, description: 'Track-focused upgrades' }
-                ],
-                colors: [
-                    { id: 'obsidian', name: 'Obsidian Black', price: 0, hex: '#1a1a1a', image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800' },
-                    { id: 'polar', name: 'Polar White', price: 1200, hex: '#f5f5f5', image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800' },
-                    { id: 'designo', name: 'Iridium Silver', price: 2500, hex: '#9e9e9e', image: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=800' }
-                ],
-                wheels: [
-                    { id: '19inch', name: '19" AMG Twin-Spoke', price: 0, image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=400' },
-                    { id: '20inch', name: '20" AMG Forged', price: 2000, image: 'https://images.unsplash.com/photo-1625231334168-35067f8853ed?w=400' }
-                ],
-                interiors: [
-                    { id: 'black', name: 'Black Leather', price: 0, image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400' },
-                    { id: 'red', name: 'Red/Black Leather', price: 2500, image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400' }
-                ]
-            }
-        ];
+            <div class="d-flex justify-content-between mt-5 pt-4" style="border-top: 1px solid #333;">
+                <button id="prevBtn" class="btn btn-outline-light px-4 py-2" onclick="changeStep(-1)" style="border-radius: 0; display: none;">BACK</button>
+                <button id="nextBtn" class="btn btn-gradient btn-3d px-5 py-2" onclick="changeStep(1)" disabled style="margin-left: auto;">CONTINUE</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-        // Initialize
-        async function init() {
-            try {
-                if (db) {
-                    const snapshot = await db.collection('amg_models').get();
-                    models = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                } else {
-                    models = mockData;
-                }
-            } catch (error) {
-                console.error('Error loading data:', error);
-                models = mockData;
-            }
-            
-            document.getElementById('loadingScreen').classList.add('hidden');
-            renderStep();
-        }
+<style>
+    .progress-step { flex: 1; text-align: center; position: relative; color: #555; font-size: 0.75rem; font-weight: 800; transition: 0.3s; }
+    .progress-step.active { color: #fff; }
+    .progress-step.active::after { background: #d1001a; box-shadow: 0 0 15px #d1001a; transform: scale(1.2); }
+    .progress-step::after { content: ''; display: block; width: 10px; height: 10px; background: #333; border-radius: 50%; margin: 10px auto; transition: 0.4s; }
+    
+    .option-item { 
+        background: rgba(40,40,40,0.4); border: 1px solid #333; padding: 1.5rem; margin-bottom: 1rem; cursor: pointer; transition: 0.3s; 
+    }
+    .option-item:hover { border-color: #666; transform: translateX(5px); }
+    .option-item.selected { border-left: 5px solid #d1001a; background: rgba(209, 0, 26, 0.15); border-color: #d1001a; }
+    
+    .color-circle { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #444; margin-right: 15px; display: inline-block; vertical-align: middle; }
+    
+    #main-car-image.loading { opacity: 0.3; transform: scale(0.95); }
+</style>
 
-        // Format Price
-        function formatPrice(price) {
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 0
-            }).format(price);
-        }
+<script>
+    const mockData = {
+        steps: ['MODEL', 'TRIM', 'COLOR', 'WHEELS', 'INTERIOR', 'SUMMARY'],
+        models: [
+            { id: 'gt63', name: 'AMG GT 63 S E Performance', basePrice: 180500, image: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200' },
+            { id: 'c63', name: 'AMG C 63 S Performance', basePrice: 83900, image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1200' },
+            { id: 'sl63', name: 'AMG SL 63 Roadster', basePrice: 178100, image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1200' }
+        ],
+        trims: [
+            { id: 'standard', name: 'Standard Edition', price: 0, desc: 'Base performance setup' },
+            { id: 'night', name: 'AMG Night Package', price: 2500, desc: 'High-gloss black accents' },
+            { id: 'carbon', name: 'Carbon Fiber Package', price: 7300, desc: 'Lightweight carbon aero components' }
+        ],
+        colors: [
+            { id: 'obsidian', name: 'Obsidian Black', hex: '#000000', price: 0, img: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200' },
+            { id: 'magno', name: 'Selenite Grey Magno', hex: '#4b4b4b', price: 3250, img: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1200' },
+            { id: 'red', name: 'Jupiter Red', hex: '#8b0000', price: 1500, img: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=1200' }
+        ],
+        wheels: [
+            { id: 'w19', name: '19" AMG 10-Spoke', price: 0 },
+            { id: 'w21', name: '21" AMG Forged Cross-Spoke Black', price: 4150 }
+        ],
+        interiors: [
+            { id: 'black', name: 'Black Nappa Leather', price: 0 },
+            { id: 'red_pepper', name: 'Red Pepper/Black Nappa', price: 2800 }
+        ]
+    };
 
-        // Calculate Total
-        function calculateTotal() {
-            let total = 0;
-            if (configuration.model) total += configuration.model.basePrice;
-            if (configuration.trim) total += configuration.trim.price;
-            if (configuration.color) total += configuration.color.price;
-            if (configuration.wheels) total += configuration.wheels.price;
-            if (configuration.interior) total += configuration.interior.price;
-            document.getElementById('totalPrice').textContent = formatPrice(total);
-        }
+    let currentStepIdx = 0;
+    let config = { model: null, trim: null, color: null, wheels: null, interior: null };
 
-        // Render Progress Bar
-        function renderProgressBar() {
-            const steps = ['Model', 'Trim', 'Color', 'Wheels', 'Interior', 'Checkout'];
-            const stepIds = ['model', 'trim', 'color', 'wheels', 'interior', 'checkout'];
-            const currentIndex = stepIds.indexOf(currentStep);
-            
-            let html = '';
-            steps.forEach((step, i) => {
-                const isActive = currentIndex === i;
-                const isCompleted = currentIndex > i;
-                const circleClass = isActive ? 'active' : isCompleted ? 'completed' : '';
-                
-                html += `
-                    <div class="progress-step">
-                        <div class="step-circle ${circleClass}">
-                            ${isCompleted ? '✓' : i + 1}
-                        </div>
-                        <span class="step-label">${step}</span>
-                    </div>
-                `;
-                
-                if (i < steps.length - 1) {
-                    html += '<span class="step-arrow">›</span>';
-                }
-            });
-            
-            document.getElementById('progressBar').innerHTML = html;
-        }
+    function init() {
+        renderStepIndicator();
+        renderCurrentStep();
+        updateUI();
+    }
 
-        // Render Step
-        function renderStep() {
-            // Hide all steps
-            ['model', 'trim', 'color', 'wheels', 'interior', 'checkout'].forEach(step => {
-                document.getElementById(`${step}Step`).classList.add('hidden');
-            });
-            
-            // Show current step
-            document.getElementById(`${currentStep}Step`).classList.remove('hidden');
-            
-            // Show/hide nav buttons
-            if (currentStep === 'checkout') {
-                document.getElementById('navButtons').classList.add('hidden');
-            } else {
-                document.getElementById('navButtons').classList.remove('hidden');
-                updateContinueButton();
-            }
-            
-            renderProgressBar();
-            
-            // Render step content
-            switch(currentStep) {
-                case 'model':
-                    renderModels();
-                    break;
-                case 'trim':
-                    renderTrims();
-                    break;
-                case 'color':
-                    renderColors();
-                    break;
-                case 'wheels':
-                    renderWheels();
-                    break;
-                case 'interior':
-                    renderInteriors();
-                    break;
-                case 'checkout':
-                    renderCheckout();
-                    break;
-            }
-        }
+    function renderStepIndicator() {
+        const container = document.getElementById('stepIndicator');
+        container.innerHTML = mockData.steps.map((s, i) => `
+            <div class="progress-step ${i === currentStepIdx ? 'active' : ''}">${s}</div>
+        `).join('');
+    }
 
-        // Render Models
-        function renderModels() {
-            const grid = document.getElementById('modelGrid');
-            grid.innerHTML = models.map(model => `
-                <div class="card" onclick="selectModel('${model.id}')">
-                    <img src="${model.image}" alt="${model.name}" class="card-image">
-                    <div class="card-content">
-                        <h3 class="card-title">${model.name}</h3>
-                        <p class="card-description">${model.description}</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #9ca3af;">Starting at</span>
-                            <span class="card-price">${formatPrice(model.basePrice)}</span>
-                        </div>
+    function renderCurrentStep() {
+        const content = document.getElementById('step-content');
+        const stepKey = mockData.steps[currentStepIdx].toLowerCase();
+        let html = `<h3 class="mb-4 text-uppercase fw-bold" style="letter-spacing:1px;">Select ${stepKey}</h3>`;
+
+        if (stepKey === 'model') {
+            html += mockData.models.map(m => `
+                <div class="option-item ${config.model?.id === m.id ? 'selected' : ''}" onclick="selectItem('model', '${m.id}')">
+                    <div class="d-flex justify-content-between">
+                        <strong>${m.name}</strong>
+                        <span class="text-danger">$${m.basePrice.toLocaleString()}</span>
                     </div>
                 </div>
             `).join('');
-        }
-
-        // Render Trims
-        function renderTrims() {
-            const grid = document.getElementById('trimGrid');
-            grid.innerHTML = selectedModel.trims.map(trim => `
-                <div class="option-card ${configuration.trim?.id === trim.id ? 'selected' : ''}" onclick="selectOption('trim', '${trim.id}')">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-                        <span style="font-size: 1.5rem;">⚙️</span>
-                        ${configuration.trim?.id === trim.id ? '<span class="check-icon">✓</span>' : ''}
-                    </div>
-                    <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5rem;">${trim.name}</h3>
-                    <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 1rem;">${trim.description}</p>
-                    <p class="card-price">${trim.price === 0 ? 'Included' : '+' + formatPrice(trim.price)}</p>
+        } else if (stepKey === 'trim') {
+            html += mockData.trims.map(t => `
+                <div class="option-item ${config.trim?.id === t.id ? 'selected' : ''}" onclick="selectItem('trim', '${t.id}')">
+                    <strong>${t.name}</strong><br><small class="text-muted">${t.desc}</small>
+                    <div class="text-danger mt-1">+$${t.price.toLocaleString()}</div>
+                </div>
+            `).join('');
+        } else if (stepKey === 'color') {
+            html += mockData.colors.map(c => `
+                <div class="option-item ${config.color?.id === c.id ? 'selected' : ''}" onclick="selectItem('color', '${c.id}')">
+                    <span class="color-circle" style="background:${c.hex}"></span>
+                    <strong>${c.name}</strong>
+                    <span class="float-end text-danger">+$${c.price.toLocaleString()}</span>
+                </div>
+            `).join('');
+        } else if (stepKey === 'summary') {
+            html = `<h3 class="mb-4 text-uppercase fw-bold">Configuration Complete</h3>
+                    <div class="card-glassmorphism p-4" style="background:rgba(255,255,255,0.05)">
+                        <p>Model: ${config.model.name}</p>
+                        <p>Trim: ${config.trim.name}</p>
+                        <p>Color: ${config.color.name}</p>
+                        <p>Wheels: ${config.wheels.name}</p>
+                        <p>Interior: ${config.interior.name}</p>
+                        <hr style="border-color:#444">
+                        <button class="btn btn-danger w-100 py-3 mt-2" onclick="alert('Configuration Saved!')">SEND TO DEALERSHIP</button>
+                    </div>`;
+        } else {
+            const items = mockData[stepKey + (stepKey === 'wheels' ? '' : 's')];
+            html += items.map(item => `
+                <div class="option-item ${config[stepKey]?.id === item.id ? 'selected' : ''}" onclick="selectItem('${stepKey}', '${item.id}')">
+                    <strong>${item.name}</strong>
+                    <span class="float-end text-danger">+$${item.price.toLocaleString()}</span>
                 </div>
             `).join('');
         }
+        content.innerHTML = html;
+    }
 
-        // Render Colors
-        function renderColors() {
-            const grid = document.getElementById('colorGrid');
-            grid.innerHTML = selectedModel.colors.map(color => `
-                <div class="card ${configuration.color?.id === color.id ? 'selected' : ''}" onclick="selectOption('color', '${color.id}')">
-                    <div style="position: relative;">
-                        <img src="${color.image}" alt="${color.name}" class="card-image">
-                        ${configuration.color?.id === color.id ? '<div style="position: absolute; top: 8px; right: 8px; background: #dc2626; border-radius: 50%; padding: 4px; color: white;">✓</div>' : ''}
-                    </div>
-                    <div class="card-content">
-                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                            <div class="color-swatch" style="background-color: ${color.hex};"></div>
-                            <h3 style="font-weight: 600;">${color.name}</h3>
-                        </div>
-                        <p class="card-price">${color.price === 0 ? 'Included' : '+' + formatPrice(color.price)}</p>
-                    </div>
-                </div>
-            `).join('');
+    function selectItem(type, id) {
+        let source = mockData[type + (type === 'model' || type === 'color' || type === 'trim' ? 's' : (type === 'wheels' ? '' : 's'))];
+        config[type] = source.find(item => item.id === id);
+        
+        if (type === 'model' || type === 'color') {
+            const imgEl = document.getElementById('main-car-image');
+            imgEl.classList.add('loading');
+            setTimeout(() => {
+                imgEl.src = config.color?.img || config.model?.image;
+                imgEl.classList.remove('loading');
+            }, 300);
         }
+        
+        updateUI();
+        renderCurrentStep();
+    }
 
-        // Render Wheels
-        function renderWheels() {
-            const grid = document.getElementById('wheelsGrid');
-            grid.innerHTML = selectedModel.wheels.map(wheel => `
-                <div class="card ${configuration.wheels?.id === wheel.id ? 'selected' : ''}" onclick="selectOption('wheels', '${wheel.id}')">
-                    <div style="position: relative;">
-                        <img src="${wheel.image}" alt="${wheel.name}" class="card-image">
-                        ${configuration.wheels?.id === wheel.id ? '<div style="position: absolute; top: 8px; right: 8px; background: #dc2626; border-radius: 50%; padding: 4px; color: white;">✓</div>' : ''}
-                    </div>
-                    <div class="card-content">
-                        <h3 style="font-weight: 600; margin-bottom: 0.5rem;">${wheel.name}</h3>
-                        <p class="card-price">${wheel.price === 0 ? 'Included' : '+' + formatPrice(wheel.price)}</p>
-                    </div>
-                </div>
-            `).join('');
+    function changeStep(dir) {
+        currentStepIdx += dir;
+        renderStepIndicator();
+        renderCurrentStep();
+        updateUI();
+    }
+
+    function updateUI() {
+        let total = 0;
+        if (config.model) total += config.model.basePrice;
+        if (config.trim) total += config.trim.price;
+        if (config.color) total += config.color.price;
+        if (config.wheels) total += config.wheels.price;
+        if (config.interior) total += config.interior.price;
+        document.getElementById('totalPrice').innerText = '$' + total.toLocaleString();
+
+        document.getElementById('prevBtn').style.display = currentStepIdx > 0 ? 'block' : 'none';
+        const nextBtn = document.getElementById('nextBtn');
+        
+        const currentKey = mockData.steps[currentStepIdx].toLowerCase();
+        const isSelected = currentKey === 'summary' ? true : !!config[currentKey];
+        nextBtn.disabled = !isSelected;
+        nextBtn.innerText = currentStepIdx === mockData.steps.length - 1 ? 'FINISH' : 'CONTINUE';
+        
+        if (!document.getElementById('main-car-image').src && config.model) {
+            document.getElementById('main-car-image').src = config.model.image;
         }
+    }
 
-        // Render Interiors
-        function renderInteriors() {
-            const grid = document.getElementById('interiorGrid');
-            grid.innerHTML = selectedModel.interiors.map(interior => `
-                <div class="card ${configuration.interior?.id === interior.id ? 'selected' : ''}" onclick="selectOption('interior', '${interior.id}')">
-                    <div style="position: relative;">
-                        <img src="${interior.image}" alt="${interior.name}" class="card-image">
-                        ${configuration.interior?.id === interior.id ? '<div style="position: absolute; top: 8px; right: 8px; background: #dc2626; border-radius: 50%; padding: 4px; color: white;">✓</div>' : ''}
-                    </div>
-                    <div class="card-content">
-                        <h3 style="font-weight: 600; margin-bottom: 0.5rem;">${interior.name}</h3>
-                        <p class="card-price">${interior.price === 0 ? 'Included' : '+' + formatPrice(interior.price)}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Render Checkout
-        function renderCheckout() {
-            document.getElementById('summaryImage').src = configuration.color?.image || configuration.model?.image;
-            document.getElementById('summaryModel').textContent = configuration.model?.name;
-            
-            const details = `
-                <div class="summary-row">
-                    <span>Base Price</span>
-                    <span style="font-weight: 600;">${formatPrice(configuration.model?.basePrice)}</span>
-                </div>
-                <div class="summary-row">
-                    <span>Trim: ${configuration.trim?.name}</span>
-                    <span style="font-weight: 600;">${configuration.trim?.price === 0 ? 'Included' : '+' + formatPrice(configuration.trim?.price)}</span>
-                </div>
-                <div class="summary-row">
-                    <span>Color: ${configuration.color?.name}</span>
-                    <span style="font-weight: 600;">${configuration.color?.price === 0 ? 'Included' : '+' + formatPrice(configuration.color?.price)}</span>
-                </div>
-                <div class="summary-row">
-                    <span>Wheels: ${configuration.wheels?.name}</span>
-                    <span style="font-weight: 600;">${configuration.wheels?.price === 0 ? 'Included' : '+' + formatPrice(configuration.wheels?.price)}</span>
-                </div>
-                <div class="summary-row">
-                    <span>Interior: ${configuration.interior?.name}</span>
-                    <span style="font-weight: 600;">${configuration.interior?.price === 0 ? 'Included' : '+' + formatPrice(configuration.interior?.price)}</span>
-                </div>
-                <div class="summary-row summary-total">
-                    <span>Total</span>
-                    <span>${document.getElementById('totalPrice').textContent}</span>
-                </div>
-            `;
-            
-            document.getElementById('summaryDetails').innerHTML = details;
-        }
-
-        // Select Model
-        function selectModel(modelId) {
-            selectedModel = models.find(m => m.id === modelId);
-            configuration.model = selectedModel;
-            calculateTotal();
-            nextStep();
-        }
-
-        // Select Option
-        function selectOption(type, optionId) {
-            const option = selectedModel[type + 's'].find(o => o.id === optionId);
-            configuration[type] = option;
-            calculateTotal();
-            renderStep();
-            updateContinueButton();
-        }
-
-        // Update Continue Button
-        function updateContinueButton() {
-            const btn = document.getElementById('continueBtn');
-            let canProceed = false;
-            
-            switch(currentStep) {
-                case 'model':
-                    canProceed = configuration.model !== null;
-                    break;
-                case 'trim':
-                    canProceed = configuration.trim !== null;
-                    break;
-                case 'color':
-                    canProceed = configuration.color !== null;
-                    break;
-                case 'wheels':
-                    canProceed = configuration.wheels !== null;
-                    break;
-                case 'interior':
-                    canProceed = configuration.interior !== null;
-                    break;
-            }
-            
-            btn.disabled = !canProceed;
-        }
-
-        // Next Step
-        function nextStep() {
-            const steps = ['model', 'trim', 'color', 'wheels', 'interior', 'checkout'];
-            const currentIndex = steps.indexOf(currentStep);
-            
-            if (currentIndex < steps.length - 1) {
-                currentStep = steps[currentIndex + 1];
-                renderStep();
-            }
-        }
-
-        // Complete Purchase
-        function completePurchase() {
-            alert('Thank you for configuring your AMG! Total: ' + document.getElementById('totalPrice').textContent + '\n\nIn a production environment, this would proceed to payment processing.');
-        }
-
-        // Initialize on load
-        window.addEventListener('DOMContentLoaded', init);
-    </script>
-</body>
-</html>
+    window.addEventListener('DOMContentLoaded', init);
+</script>
 {% endblock %}
