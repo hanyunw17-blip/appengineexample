@@ -1,28 +1,31 @@
-<!-- templates/login.html -->
 {% extends "base.html" %}
 
-{% block title %}Login - Auth App{% endblock %}
+{% block title %}AMG Login - Authentication{% endblock %}
 
 {% block content %}
-<div class="text-center">
-    <h2 style="color: #333; margin-bottom: 2rem;">Login</h2>
+<div class="text-center fadeInUp">
+    <h2 style="color: #ffffff; margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 2px;">
+        AMG <span>Member</span> Login
+    </h2>
 </div>
 
-<form method="POST">
-    <div class="form-group">
+<form method="POST" class="fadeInUp">
+    <div class="form-group floating-label">
+        <input type="text" id="username" name="username" placeholder=" " required>
         <label for="username">Username</label>
-        <input type="text" id="username" name="username" required>
     </div>
     
-    <div class="form-group">
+    <div class="form-group floating-label">
+        <input type="password" id="password" name="password" placeholder=" " required>
         <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
     </div>
     
-    <button type="submit" class="btn">Login</button>
+    <button type="submit" class="btn btn-gradient btn-3d">Authorize Access</button>
     
     <div class="text-center mt-3">
-        <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+        <p style="color: #888;">New to the Private Lounge? 
+            <a href="{{ url_for('register') }}" style="color: #d1001a; text-decoration: none; font-weight: bold;">Register Here</a>
+        </p>
     </div>
 </form>
 {% endblock %}
