@@ -1,25 +1,24 @@
-<!-- templates/home.html -->
 {% extends "base.html" %}
 
-{% block title %}Welcome - Auth App{% endblock %}
+{% block title %}AMG Configurator - Driving Performance{% endblock %}
 
 {% block content %}
 {% if session.user_id %}
-    <div class="welcome-card">
-        <h1>Welcome back!</h1>
-        <p>You are successfully logged in.</p>
+    <div class="welcome-card fadeInUp">
+        <h1>Welcome Back, Driver</h1>
+        <p>Your performance cockpit is ready. Continue managing your profile and configurations.</p>
         <div class="btn-group">
-            <a href="{{ url_for('profile') }}" class="btn-secondary">View Profile</a>
+            <a href="{{ url_for('profile') }}" class="btn-gradient btn-3d" style="text-decoration: none; padding: 0.75rem 1.5rem; border-radius: 4px;">View Profile</a>
             <a href="{{ url_for('logout') }}" class="btn-secondary">Logout</a>
         </div>
     </div>
 {% else %}
-    <div class="welcome-card">
-        <h1>Welcome to AuthApp</h1>
-        <p>A secure authentication system built with Flask and Google App Engine.</p>
+    <div class="welcome-card fadeInUp">
+        <h1>AMG Configurator</h1>
+        <p>Precision engineering meets digital luxury. Sign in to design your masterpiece and explore the world of Mercedes-AMG.</p>
         <div class="btn-group">
-            <a href="{{ url_for('login') }}" class="btn-secondary">Login</a>
-            <a href="{{ url_for('register') }}" class="btn-secondary">Register</a>
+            <a href="{{ url_for('login') }}" class="btn-gradient btn-3d" style="text-decoration: none; padding: 0.75rem 1.5rem; border-radius: 4px;">Start Login</a>
+            <a href="{{ url_for('register') }}" class="btn-secondary">Join Private Lounge</a>
         </div>
     </div>
 {% endif %}
