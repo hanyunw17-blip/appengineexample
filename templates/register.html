@@ -1,38 +1,41 @@
-<!-- templates/register.html -->
 {% extends "base.html" %}
 
-{% block title %}Register - Auth App{% endblock %}
+{% block title %}Join the Private Lounge - AMG Configurator{% endblock %}
 
 {% block content %}
-<div class="text-center">
-    <h2 style="color: #333; margin-bottom: 2rem;">Create Account</h2>
+<div class="text-center fadeInUp">
+    <h2 style="color: #ffffff; margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 2px;">
+        Join the <span>Private</span> Lounge
+    </h2>
 </div>
 
-<form method="POST">
-    <div class="form-group">
+<form method="POST" class="fadeInUp">
+    <div class="form-group floating-label">
+        <input type="text" id="username" name="username" placeholder=" " required>
         <label for="username">Username</label>
-        <input type="text" id="username" name="username" required>
     </div>
     
-    <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" required>
+    <div class="form-group floating-label">
+        <input type="email" id="email" name="email" placeholder=" " required>
+        <label for="email">Email Address</label>
     </div>
     
-    <div class="form-group">
+    <div class="form-group floating-label">
+        <input type="password" id="password" name="password" placeholder=" " required>
         <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
     </div>
     
-    <div class="form-group">
+    <div class="form-group floating-label">
+        <input type="password" id="confirm_password" name="confirm_password" placeholder=" " required>
         <label for="confirm_password">Confirm Password</label>
-        <input type="password" id="confirm_password" name="confirm_password" required>
     </div>
     
-    <button type="submit" class="btn">Register</button>
+    <button type="submit" class="btn btn-gradient btn-3d">Create Racing Profile</button>
     
     <div class="text-center mt-3">
-        <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+        <p style="color: #888;">Already a member? 
+            <a href="{{ url_for('login') }}" style="color: #d1001a; text-decoration: none; font-weight: bold;">Login Here</a>
+        </p>
     </div>
 </form>
 {% endblock %}
